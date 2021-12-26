@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Command mkcert is a simple zero-config tool to make development certificates.
+// Command mkcert is a simple zero-config tool to make selfcert certificates.
 package main
 
 import (
@@ -29,60 +29,138 @@ import (
 
 const shortUsage = `Usage of mkcert:
 
-	$ mkcert -install
-	Install the local CA in the system trust store.
+ $ mkcert -version
+ Show version number and details.
 
-	$ mkcert example.org
-	Generate "example.org.pem" and "example.org-key.pem".
+ $ mkcert -install
+ Install the local CA in the system trust store.
 
-	$ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
-	Generate "example.com+4.pem" and "example.com+4-key.pem".
+ $ mkcert example.org
+ Generate "example.org.pem" and "example.org-key.pem".
 
-	$ mkcert "*.example.it"
-	Generate "_wildcard.example.it.pem" and "_wildcard.example.it-key.pem".
+ $ mkcert example.com myapp.dev localhost 127.0.0.1 ::1
+ Generate "example.com+4.pem" and "example.com+4-key.pem".
 
-	$ mkcert -uninstall
-	Uninstall the local CA (but do not delete it).
+ $ mkcert "*.example.it"
+ Generate "_wildcard.example.it.pem" and "_wildcard.example.it-key.pem".
+
+ $ mkcert -uninstall
+ Uninstall the local CA (but do not delete it).
 
 `
 
 const advancedUsage = `Advanced options:
 
-	-cert-file FILE, -key-file FILE, -p12-file FILE
-	    Customize the output paths.
+ -cert-file FILE, -key-file FILE, -p12-file FILE
+  Customize the output paths.
 
-	-client
-	    Generate a certificate for client authentication.
+ -client
+  Generate a certificate for client authentication.
 
-	-ecdsa
-	    Generate a certificate with an ECDSA key.
+ -ecdsa
+  Generate a certificate with an ECDSA key.
 
-	-pkcs12
-	    Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
-	    containing certificate and key for legacy applications.
+ -ed25519
+  Generate a certificate with an Ed25519 key.
 
-	-csr CSR
-	    Generate a certificate based on the supplied CSR. Conflicts with
-	    all other flags and arguments except -install and -cert-file.
+ -pkcs12
+  Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
+  containing certificate and key for legacy applications.
 
-	-CAROOT
-	    Print the CA certificate and key storage location.
+ -csr CSR
+  Generate a certificate based on the supplied CSR. Conflicts with
+  all other flags and arguments except -install and -cert-file.
 
-	$CAROOT (environment variable)
-	    Set the CA certificate and key storage location. (This allows
-	    maintaining multiple local CAs in parallel.)
+ -o ORGANIZATION
+  The value for section Organization ('O') in the certificate
+  subject.
 
-	$TRUST_STORES (environment variable)
-	    A comma-separated list of trust stores to install the local
-	    root CA into. Options are: "system", "java" and "nss" (includes
-	    Firefox). Autodetected by default.
+ -ou ORGANIZATIONAL_UNIT
+  The value for section Organizational Unit ('OU') in the certificate
+  subject.
+
+ -country COUNTRY
+  The value for section Country ('C') in the certificate subject.
+
+ -cn COMMONNAME
+  The value for section CommonName ('CN') in the certificate
+  subject.
+
+ -password PASSWORD
+  The password used to encrypt the private key-file. By default
+  the password is empty and therefore the private key is not
+  encrypted. Java keystores typically expect the password
+  'changeit' by default.
+
+ -CAROOT
+  Print the CA certificate and key storage location.
+
+  $CAROOT (environment variable)
+  Set the CA certificate and key storage location. (This allows
+  maintaining multiple local CAs in parallel.)
+
+  $TRUST_STORES (environment variable)
+  A comma-separated list of trust stores to install the local
+  root CA into. Options are: "system", "java" and "nss" (includes
+  Firefox). Autodetected by default.
+
+ -NOCA
+  Do not create and do not use a ROOTCA-certificate for
+  certificate-creation.
+
+ Examples:
+  RSA 4096 SHA512 WITHOUT CA ...........:
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
+  -country "de" -cn "vname.nname.@my_ou.my_org.de" \
+  -NOCA "vname.nname.@my_ou.my_org.de"
+
+  RSA 4096 SHA512 WITH CA ..............:
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
+  -country "de" -cn "vname.nname.@my_ou.my_org.de" \
+  "vname.nname.@my_ou.my_org.de"
+
+  ECDSA (ECDH_P256) SHA256 WITHOUT CA...:
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
+  -country "de" -cn "vname.nname.@my_ou.my_org.de" -NOCA \
+  "vname.nname.@my_ou.my_org.de"
+
+  ECDSA (ECDH_P256) SHA256 WITH CA......:
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
+  -country "de" -cn "vname.nname.@my_ou.my_org.de" \
+  "vname.nname.@my_ou.my_org.de"
 
 `
 
 // Version can be set at link time to override debug.BuildInfo.Main.Version,
 // which is "(devel)" when building from within the module. See
 // golang.org/issue/29814 and golang.org/issue/29228.
-var Version string
+var Version string = `
+mkcert V1.4.6.0 (Reloaded Version by Veit Berwig).
+
+Based on mkcert v1.4.3 Copyright 2018 by ...
+The mkcert Authors. Original version copyright by
+Filippo Valsorda, software engineer on the Go
+security team at Google. Changes in this version:
+
+- Larger key-size for RSA (4096 bit)
+- Cert generation without CA-certificate (single self-signed)
+- RSA suite with hash SHA-512
+- ECDSA suite with curve P-256 and SHA-256
+  (This implementation uses constant-time algorithms)
+- AES256 as cipher for pkcs12/pfx-store
+- Organisation and Common-Name support
+- Custom Organisational-Unit support
+- Custom Country support
+- SubjectKeyId in both certs added
+- AuthorityKeyId in both certs added
+- Support for Bernstein Curve25519 in cert
+- Fixed name for CA-cert...: MKCERT_CA.pem
+- Fixed name for CA-key....: MKCERT_CA-key.pem
+- Secure operation, when provided without args (no action)
+
+RSA keys will use....: RSA 4096 bit with SHA512
+ECDSA keys will use..: NIST-P256 (named) with SHA256
+Ed25519 keys will use: PureEd25519 with SHA512`
 
 func main() {
 	log.SetFlags(0)
@@ -91,6 +169,7 @@ func main() {
 		uninstallFlag = flag.Bool("uninstall", false, "")
 		pkcs12Flag    = flag.Bool("pkcs12", false, "")
 		ecdsaFlag     = flag.Bool("ecdsa", false, "")
+        	ed25519Flag   = flag.Bool("ed25519", false, "")
 		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
@@ -99,8 +178,15 @@ func main() {
 		keyFileFlag   = flag.String("key-file", "", "")
 		p12FileFlag   = flag.String("p12-file", "", "")
 		versionFlag   = flag.Bool("version", false, "")
+		oFlag         = flag.String("o", "MKCERT SELFCERT", "")
+		ouFlag        = flag.String("ou", "MKCERT SELFCERT", "")
+		countryFlag   = flag.String("country", "DE", "")
+		cnFlag        = flag.String("cn", "MKCERT SELFCERT", "")
+		passwordFlag  = flag.String("password", "", "")
+        	nocaFlag      = flag.Bool("NOCA", false, "")
 	)
-	flag.Usage = func() {
+
+    	flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
 		fmt.Fprintln(flag.CommandLine.Output(), `For more options, run "mkcert -help".`)
 	}
@@ -132,31 +218,69 @@ func main() {
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
-	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag || *clientFlag) {
+    	// Prevent using "pkcs12" WITH "EDDSA", because "pkcs12"  doesn't support Curve25519
+	if *pkcs12Flag && *ed25519Flag {
+		log.Fatalln("ERROR: pkcs12-container does not support curve25519")
+	}
+    	// Prevent using "ECDSA" AND "EDDSA" at the same time
+	if *ecdsaFlag && *ed25519Flag {
+		log.Fatalln("ERROR: you can't set -ecdsa and -ed25519 at the same time")
+	}
+	if *csrFlag != "" && (*pkcs12Flag || *ecdsaFlag || *ed25519Flag || *clientFlag || *nocaFlag) {
 		log.Fatalln("ERROR: can only combine -csr with -install and -cert-file")
 	}
 	if *csrFlag != "" && flag.NArg() != 0 {
 		log.Fatalln("ERROR: can't specify extra arguments when using -csr")
 	}
+	if *nocaFlag {
+		if *installFlag || *uninstallFlag {
+			log.Fatalln("ERROR: you can't set -NOCA and -[un]install at the same time")
+		}
+	}
+
+    // Show version without action, when no args are provided.
+    // ========================================================
+    // This is for proper secure operation without action, when
+    // user clicks or run the binary without args ...
+    ArgValues := flag.Args()
+    if len(ArgValues) == 0 {
+            fmt.Println(Version)
+            // fmt.Fprint(flag.CommandLine.Output(), shortUsage)
+            fmt.Fprintln(flag.CommandLine.Output(), `For more options, run "mkcert -help".`)
+			// return
+            os.Exit(0)
+    }
+    // ========================================================
+
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
-		pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, client: *clientFlag,
-		certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		noca: *nocaFlag, pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, ed25519: *ed25519Flag,
+        	client: *clientFlag, certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+		Organization: *oFlag, OrganizationUnit: *ouFlag, Country: *countryFlag, CommonName: *cnFlag,
+		password: *passwordFlag,
 	}).Run(flag.Args())
 }
 
-const rootName = "rootCA.pem"
-const rootKeyName = "rootCA-key.pem"
+const rootName = "MKCERT_CA.pem"
+const rootKeyName = "MKCERT_CA-key.pem"
 
 type mkcert struct {
-	installMode, uninstallMode bool
-	pkcs12, ecdsa, client      bool
-	keyFile, certFile, p12File string
-	csrPath                    string
+	installMode, uninstallMode      bool
+	pkcs12, ecdsa, ed25519, client  bool
+    	noca                            bool
+	keyFile, certFile, p12File      string
+	csrPath                         string
 
 	CAROOT string
 	caCert *x509.Certificate
 	caKey  crypto.PrivateKey
+
+	Organization     string
+	OrganizationUnit string
+	Country          string
+	CommonName       string
+
+	password string
 
 	// The system cert pool is only loaded once. After installing the root, checks
 	// will keep failing until the next execution. TODO: maybe execve?
@@ -165,44 +289,54 @@ type mkcert struct {
 }
 
 func (m *mkcert) Run(args []string) {
-	m.CAROOT = getCAROOT()
-	if m.CAROOT == "" {
-		log.Fatalln("ERROR: failed to find the default CA location, set one as the CAROOT env var")
-	}
-	fatalIfErr(os.MkdirAll(m.CAROOT, 0755), "failed to create the CAROOT")
-	m.loadCA()
+    // Using CA certificate for cert creation
+    if !m.noca {
+        m.CAROOT = getCAROOT()
+        if m.CAROOT == "" {
+            log.Fatalln("ERROR: failed to find the default CA location, set one as the CAROOT env var")
+        }
+        fatalIfErr(os.MkdirAll(m.CAROOT, 0755), "failed to create the CAROOT")
+        m.loadCA()
 
-	if m.installMode {
-		m.install()
-		if len(args) == 0 {
-			return
-		}
-	} else if m.uninstallMode {
-		m.uninstall()
-		return
-	} else {
-		var warning bool
-		if storeEnabled("system") && !m.checkPlatform() {
-			warning = true
-			log.Println("Note: the local CA is not installed in the system trust store.")
-		}
-		if storeEnabled("nss") && hasNSS && CertutilInstallHelp != "" && !m.checkNSS() {
-			warning = true
-			log.Printf("Note: the local CA is not installed in the %s trust store.", NSSBrowsers)
-		}
-		if storeEnabled("java") && hasJava && !m.checkJava() {
-			warning = true
-			log.Println("Note: the local CA is not installed in the Java trust store.")
-		}
-		if warning {
-			log.Println("Run \"mkcert -install\" for certificates to be trusted automatically ⚠️")
-		}
-	}
+        if m.installMode {
+            m.install()
+            if len(args) == 0 {
+                return
+            }
+        } else if m.uninstallMode {
+            m.uninstall()
+            return
+        } else {
+            var warning bool
+            if storeEnabled("system") && !m.checkPlatform() {
+                warning = true
+                log.Println("Note: the local CA is not installed in the system trust store.")
+            }
+            if storeEnabled("nss") && hasNSS && CertutilInstallHelp != "" && !m.checkNSS() {
+                warning = true
+                log.Printf("Note: the local CA is not installed in the %s trust store.", NSSBrowsers)
+            }
+            if storeEnabled("java") && hasJava && !m.checkJava() {
+                warning = true
+                log.Println("Note: the local CA is not installed in the Java trust store.")
+            }
+            if warning {
+                log.Println("Run \"mkcert -install\" for certificates to be trusted automatically")
+            }
+        }
 
-	if m.csrPath != "" {
-		m.makeCertFromCSR()
-		return
-	}
+        if m.csrPath != "" {
+            m.makeCertFromCSR()
+            return
+        }
+    // Using selfsigned certificate
+    } else {
+        m.CAROOT = getCAROOT()
+        if m.CAROOT == "" {
+            log.Fatalln("ERROR: failed to find the default CA location, set one as the CAROOT env var")
+        }
+        fatalIfErr(os.MkdirAll(m.CAROOT, 0755), "failed to create the CAROOT")
+    }
 
 	if len(args) == 0 {
 		flag.Usage()
@@ -235,7 +369,7 @@ func (m *mkcert) Run(args []string) {
 
 func getCAROOT() string {
 	if env := os.Getenv("CAROOT"); env != "" {
-		return env
+	return env
 	}
 
 	var dir string
@@ -250,7 +384,7 @@ func getCAROOT() string {
 			return ""
 		}
 		dir = filepath.Join(dir, "Library", "Application Support")
-	default: // Unix
+		default: // Unix
 		dir = os.Getenv("HOME")
 		if dir == "" {
 			return ""
@@ -263,37 +397,37 @@ func getCAROOT() string {
 func (m *mkcert) install() {
 	if storeEnabled("system") {
 		if m.checkPlatform() {
-			log.Print("The local CA is already installed in the system trust store! 👍")
+			log.Print("The local CA is already installed in the system trust store!")
 		} else {
 			if m.installPlatform() {
-				log.Print("The local CA is now installed in the system trust store! ⚡️")
+				log.Print("The local CA is now installed in the system trust store!")
 			}
 			m.ignoreCheckFailure = true // TODO: replace with a check for a successful install
 		}
 	}
 	if storeEnabled("nss") && hasNSS {
 		if m.checkNSS() {
-			log.Printf("The local CA is already installed in the %s trust store! 👍", NSSBrowsers)
+			log.Printf("The local CA is already installed in the %s trust store!", NSSBrowsers)
 		} else {
 			if hasCertutil && m.installNSS() {
-				log.Printf("The local CA is now installed in the %s trust store (requires browser restart)! 🦊", NSSBrowsers)
+				log.Printf("The local CA is now installed in the %s trust store (requires browser restart)!", NSSBrowsers)
 			} else if CertutilInstallHelp == "" {
-				log.Printf(`Note: %s support is not available on your platform. ℹ️`, NSSBrowsers)
+				log.Printf(`Note: %s support is not available on your platform.`, NSSBrowsers)
 			} else if !hasCertutil {
-				log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s! ⚠️`, NSSBrowsers)
-				log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install" 👈`, CertutilInstallHelp)
+				log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically installed in %s!`, NSSBrowsers)
+				log.Printf(`Install "certutil" with "%s" and re-run "mkcert -install"`, CertutilInstallHelp)
 			}
 		}
 	}
 	if storeEnabled("java") && hasJava {
 		if m.checkJava() {
-			log.Println("The local CA is already installed in Java's trust store! 👍")
+			log.Println("The local CA is already installed in Java's trust store!")
 		} else {
 			if hasKeytool {
 				m.installJava()
-				log.Println("The local CA is now installed in Java's trust store! ☕️")
+				log.Println("The local CA is now installed in Java's trust store!")
 			} else {
-				log.Println(`Warning: "keytool" is not available, so the CA can't be automatically installed in Java's trust store! ⚠️`)
+				log.Println(`Warning: "keytool" is not available, so the CA can't be automatically installed in Java's trust store!`)
 			}
 		}
 	}
@@ -306,8 +440,8 @@ func (m *mkcert) uninstall() {
 			m.uninstallNSS()
 		} else if CertutilInstallHelp != "" {
 			log.Print("")
-			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from %s (if it was ever installed)! ⚠️`, NSSBrowsers)
-			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall" 👈`, CertutilInstallHelp)
+			log.Printf(`Warning: "certutil" is not available, so the CA can't be automatically uninstalled from %s (if it was ever installed)!`, NSSBrowsers)
+			log.Printf(`You can install "certutil" with "%s" and re-run "mkcert -uninstall"`, CertutilInstallHelp)
 			log.Print("")
 		}
 	}
@@ -316,15 +450,15 @@ func (m *mkcert) uninstall() {
 			m.uninstallJava()
 		} else {
 			log.Print("")
-			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically uninstalled from Java's trust store (if it was ever installed)! ⚠️`)
+			log.Println(`Warning: "keytool" is not available, so the CA can't be automatically uninstalled from Java's trust store (if it was ever installed)!`)
 			log.Print("")
 		}
 	}
 	if storeEnabled("system") && m.uninstallPlatform() {
-		log.Print("The local CA is now uninstalled from the system trust store(s)! 👋")
+		log.Print("The local CA is now uninstalled from the system trust store(s)!")
 		log.Print("")
 	} else if storeEnabled("nss") && hasCertutil {
-		log.Printf("The local CA is now uninstalled from the %s trust store(s)! 👋", NSSBrowsers)
+		log.Printf("The local CA is now uninstalled from the %s trust store(s)!", NSSBrowsers)
 		log.Print("")
 	}
 }
@@ -359,7 +493,7 @@ func fatalIfErr(err error, msg string) {
 
 func fatalIfCmdErr(err error, cmd string, out []byte) {
 	if err != nil {
-		log.Fatalf("ERROR: failed to execute \"%s\": %s\n\n%s\n", cmd, err, out)
+		log.Fatalf("ERROR: failed to execute \"%s\": %s\n%s\n", cmd, err, out)
 	}
 }
 
@@ -381,7 +515,7 @@ func commandWithSudo(cmd ...string) *exec.Cmd {
 	}
 	if !binaryExists("sudo") {
 		sudoWarningOnce.Do(func() {
-			log.Println(`Warning: "sudo" is not available, and mkcert is not running as root. The (un)install operation might fail. ⚠️`)
+			log.Println(`Warning: "sudo" is not available, and mkcert is not running as root. The (un)install operation might fail.`)
 		})
 		return exec.Command(cmd[0], cmd[1:]...)
 	}
