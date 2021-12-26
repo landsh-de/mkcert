@@ -1,5 +1,121 @@
 # mkcert
 
+This is a reloaded version of mkcert :-)
+I needed some hardenings in cert parameters for other projects, so i changed some implementations here. I also added "ed25519" but i'm not sure if this works correcty in a smime-certificate under Windows.
+
+Hmm ... "certmgr" shows only the OID of "ed25519" for a "smime-cert" ... so you're invited to tell me some good hints for a better coding of a "ed25519-smime-certificate" :-)
+
+This stuff is based on mkcert v1.4.3 Copyright 2018 by the mkcert Authors. Original version copyright by Filippo Valsorda, software engineer on the Go security team at Google.
+
+Changes in this version:
+
+- Larger key-size for RSA (4096 bit)
+- Cert generation without CA-certificate (single self-signed)
+- RSA suite with hash SHA-512
+- ECDSA suite with curve P-256 and SHA-256
+  (This implementation uses constant-time algorithms)
+- AES256 as cipher for pkcs12/pfx-store
+- Organisation and Common-Name support
+- Custom Organisational-Unit support
+- Custom Country support
+- SubjectKeyId in both certs added
+- AuthorityKeyId in both certs added
+- Support for Bernstein Curve25519 in cert
+- Fixed name for CA-cert...: MKCERT_CA.pem
+- Fixed name for CA-key....: MKCERT_CA-key.pem
+- Secure operation, when provided without args (no action)
+- Removed extra special characters in commandline ...
+
+...
+RSA keys will use.......: RSA 4096 bit with SHA512
+ECDSA keys will use.....: NIST-P256 (named) with SHA256
+Ed25519 keys will use...: PureEd25519 with SHA512
+...
+
+### Advanced options:
+```
+ -cert-file FILE, -key-file FILE, -p12-file FILE
+  Customize the output paths.
+
+ -client
+  Generate a certificate for client authentication.
+
+ -ecdsa
+  Generate a certificate with an ECDSA key.
+
+ -ed25519
+  Generate a certificate with an Ed25519 key.
+
+ -pkcs12
+  Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
+  containing certificate and key for legacy applications.
+
+ -csr CSR
+  Generate a certificate based on the supplied CSR. Conflicts with
+  all other flags and arguments except -install and -cert-file.
+
+ -o ORGANIZATION
+  The value for section Organization ('O') in the certificate
+  subject.
+
+ -ou ORGANIZATIONAL_UNIT
+  The value for section Organizational Unit ('OU') in the certificate
+  subject.
+
+ -country COUNTRY
+  The value for section Country ('C') in the certificate subject.
+
+ -cn COMMONNAME
+  The value for section CommonName ('CN') in the certificate
+  subject.
+
+ -password PASSWORD
+  The password used to encrypt the private key-file.
+  By default the password is empty and therefore the private key
+  is not encrypted. Java keystores typically expect the password
+  'changeit' by default.
+
+ -CAROOT
+  Print the CA certificate and key storage location.
+
+  $CAROOT (environment variable)
+  Set the CA certificate and key storage location.
+  (This allows maintaining multiple local CAs in parallel.)
+
+  $TRUST_STORES (environment variable)
+  A comma-separated list of trust stores to install the local root CA
+  into. Options are: "system", "java" and "nss" (includes Firefox).
+  Autodetected by default.
+
+ -NOCA
+  Do not create and do not use a ROOTCA-certificate for certificate-creation.
+
+```
+
+ ### Examples:
+ 
+  RSA 4096 SHA512 WITHOUT CA:
+  ===========================
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname.@my_ou.my_org.de" -NOCA "vname.nname.@my_ou.my_org.de"
+
+  RSA 4096 SHA512 WITH CA:
+  ========================
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname.@my_ou.my_org.de" "vname.nname.@my_ou.my_org.de"
+
+  ECDSA (ECDH_P256) SHA256 WITHOUT CA:
+  ====================================
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname.@my_ou.my_org.de" -NOCA "vname.nname.@my_ou.my_org.de"
+
+  ECDSA (ECDH_P256) SHA256 WITH CA:
+  =================================
+  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname.@my_ou.my_org.de" "vname.nname.@my_ou.my_org.de"
+
+
+## Original Readme 
+### (be aware, that i've changed some functionalities like i've described above) ...
+
+<br><br><br><br>
+
 mkcert is a simple tool for making locally-trusted development certificates. It requires no configuration.
 
 ```
