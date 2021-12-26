@@ -26,11 +26,11 @@ Changes in this version:
 - Secure operation, when provided without args (no action)
 - Removed extra special characters in commandline ...
 
-...
+```
 RSA keys will use.......: RSA 4096 bit with SHA512
 ECDSA keys will use.....: NIST-P256 (named) with SHA256
 Ed25519 keys will use...: PureEd25519 with SHA512
-...
+```
 
 ### Advanced options:
 ```
