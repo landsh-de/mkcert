@@ -10,7 +10,6 @@ This stuff is based on mkcert v1.4.3 Copyright 2018 by the mkcert Authors. Origi
 Changes in this version:
 
 - Larger key-size for RSA (4096 bit)
-- Cert generation without CA-certificate (single self-signed)
 - RSA suite with hash SHA-512
 - ECDSA suite with curve P-256 and SHA-256
   (This implementation uses constant-time algorithms)
@@ -21,15 +20,27 @@ Changes in this version:
 - SubjectKeyId in both certs added
 - AuthorityKeyId in both certs added
 - Support for Bernstein Curve25519 in cert
-- Fixed name for CA-cert...: MKCERT_CA.pem
-- Fixed name for CA-key....: MKCERT_CA-key.pem
 - Secure operation, when provided without args (no action)
 - Removed extra special characters in commandline ...
+- Cert generation without CA-certificate with option "-NOCA" possible (single self-signed)
+- CA lifetime set to 4 years
+- CA Cert- and Key-filename indexed with local username (OS)
+- Additional creation of DER-encoded .crt-certfiles (pub)
 
 ```
 RSA keys will use.......: RSA 4096 bit with SHA512
 ECDSA keys will use.....: NIST-P256 (named) with SHA256
 Ed25519 keys will use...: PureEd25519 with SHA512
+```
+```
+$ mkcert -help
+Show detailed help and options.
+
+$ mkcert -version
+Show version number and details.
+
+$ mkcert -install [-option n, -option n+1, ...]
+Install the local CA in the system trust store in combination with the examples below.
 ```
 
 ### Advanced options:
