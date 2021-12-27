@@ -169,7 +169,7 @@ func main() {
 		uninstallFlag = flag.Bool("uninstall", false, "")
 		pkcs12Flag    = flag.Bool("pkcs12", false, "")
 		ecdsaFlag     = flag.Bool("ecdsa", false, "")
-        ed25519Flag   = flag.Bool("ed25519", false, "")
+        	ed25519Flag   = flag.Bool("ed25519", false, "")
 		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
@@ -183,7 +183,7 @@ func main() {
 		countryFlag   = flag.String("country", "DE", "")
 		cnFlag        = flag.String("cn", "MKCERT SELFCERT", "")
 		passwordFlag  = flag.String("password", "", "")
-        nocaFlag      = flag.Bool("NOCA", false, "")
+        	nocaFlag      = flag.Bool("NOCA", false, "")
 	)
 
     flag.Usage = func() {
@@ -255,7 +255,7 @@ func main() {
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		noca: *nocaFlag, pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, ed25519: *ed25519Flag,
-        client: *clientFlag, certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+        	client: *clientFlag, certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 		Organization: *oFlag, OrganizationUnit: *ouFlag, Country: *countryFlag, CommonName: *cnFlag,
 		password: *passwordFlag,
 	}).Run(flag.Args())
@@ -267,7 +267,7 @@ const rootKeyName = "MKCERT_CA-key.pem"
 type mkcert struct {
 	installMode, uninstallMode      bool
 	pkcs12, ecdsa, ed25519, client  bool
-    noca                            bool
+    	noca                            bool
 	keyFile, certFile, p12File      string
 	csrPath                         string
 
