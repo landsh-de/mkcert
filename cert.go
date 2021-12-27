@@ -40,7 +40,7 @@ package main
 import (
 	"crypto"
 	"crypto/ecdsa"
-    "crypto/ed25519"
+    	"crypto/ed25519"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
@@ -97,28 +97,28 @@ func (m *mkcert) publicKey(priv interface{}) interface{} {
 }
 
 func (m *mkcert) GetSignatureAlgorithm() x509.SignatureAlgorithm {
-    // https://pkg.go.dev/crypto/x509#SignatureAlgorithm
+	// https://pkg.go.dev/crypto/x509#SignatureAlgorithm
 	if m.ecdsa {
-        // Because of "ecdsa signature encoding correctness"-check in "zlint",
-        // https://github.com/zmap/zlint/blob/master/v3/lints/mozilla/lint_mp_ecdsa_signature_encoding_correct.go#L35
-        // ... if the signing key is P-256, the signature MUST use ECDSA with SHA-256
-        // and if the signing key is P-521, the signature MUST use ECDSA with SHA-512
-        // P-384 will NOT be used here, because the implementation does not use
-        // constant-time algorithms. P-256 (SHA-256) and P-521 (SHA-512) are ok:
-        // https://cs.opensource.google/go/go/+/refs/tags/go1.17.2:src/crypto/elliptic/elliptic.go;l=470
-        // ===============
-        // elliptic.P521()
-        // ===============
-	    // log.Printf("SignatureAlgorithm-Option: \"%s\"\n\n", "ECDSAWithSHA512")
+        	// Because of "ecdsa signature encoding correctness"-check in "zlint",
+        	// https://github.com/zmap/zlint/blob/master/v3/lints/mozilla/lint_mp_ecdsa_signature_encoding_correct.go#L35
+        	// ... if the signing key is P-256, the signature MUST use ECDSA with SHA-256
+        	// and if the signing key is P-521, the signature MUST use ECDSA with SHA-512
+        	// P-384 will NOT be used here, because the implementation does not use
+        	// constant-time algorithms. P-256 (SHA-256) and P-521 (SHA-512) are ok:
+        	// https://cs.opensource.google/go/go/+/refs/tags/go1.17.2:src/crypto/elliptic/elliptic.go;l=470
+        	// ===============
+        	// elliptic.P521()
+        	// ===============
+	    	// log.Printf("SignatureAlgorithm-Option: \"%s\"\n\n", "ECDSAWithSHA512")
 		// SigAlg := x509.ECDSAWithSHA512
-        // ===============
-        // elliptic.P256()
-        // ===============
-	    log.Printf("SignatureAlgorithm-Option: \"%s\"\n\n", "ECDSAWithSHA256")
+		// ===============
+		// elliptic.P256()
+		// ===============
+	    	log.Printf("SignatureAlgorithm-Option: \"%s\"\n\n", "ECDSAWithSHA256")
 		SigAlg := x509.ECDSAWithSHA256
 		return SigAlg
     } else if m.ed25519 {
-        log.Printf("SignatureAlgorithm-Option: \"%s\"\n\n", "PureEd25519")
+		log.Printf("SignatureAlgorithm-Option: \"%s\"\n\n", "PureEd25519")
 		SigAlg := x509.PureEd25519
 		return SigAlg
 	} else {
@@ -166,15 +166,15 @@ func (m *mkcert) makeCert(hosts []string) {
 		SerialNumber: randomSerialNumber(),
 		SignatureAlgorithm: m.GetSignatureAlgorithm(),
 		Subject: pkix.Name{
-			Organization:       []string{m.Organization},
-		//  OrganizationalUnit: []string{userAndHostname},
-			OrganizationalUnit: []string{m.OrganizationUnit},
-            Country:            []string{m.Country},
-		//  CommonName:         m.CommonName + " certificate",
-			CommonName:         m.CommonName,
+		Organization:       []string{m.Organization},
+		// OrganizationalUnit: []string{userAndHostname},
+		OrganizationalUnit: []string{m.OrganizationUnit},
+            	Country:            []string{m.Country},
+		// CommonName:         m.CommonName + " certificate",
+		CommonName:         m.CommonName,
 		},
 		SubjectKeyId:   skid[:],
-        AuthorityKeyId: skid[:],
+        	AuthorityKeyId: skid[:],
 		NotBefore: time.Now(), NotAfter: expiration,
 		KeyUsage: x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 	}
