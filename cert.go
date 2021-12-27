@@ -1,4 +1,4 @@
-// Copyright 2018 The mkcert Authors. All rights reserved.
+﻿// Copyright 2018 The mkcert Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -204,7 +204,11 @@ func (m *mkcert) makeCert(hosts []string) {
 	// IIS (the main target of PKCS #12 files), only shows the deprecated
 	// Common Name in the UI. See issue #115.
 	if m.pkcs12 {
-		tpl.Subject.CommonName = hosts[0]
+        // Do that only, when CommonName was not provided in commandline
+        // or has default value; otherwise we will use the Args[]-stuff here ...
+        if m.CommonName == "" || m.CommonName == "MKCERT SELFCERT" {
+            tpl.Subject.CommonName = hosts[0]
+        }
 	}
 
     // https://pkg.go.dev/crypto/x509#CreateCertificate
@@ -284,8 +288,8 @@ func (m *mkcert) makeCert(hosts []string) {
             pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, m.password)
         } else {
             // Use my selfsingned cert for pkcs12 encoding:
-            // pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{domainCert}, m.password)
-            pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, nil, m.password)
+            // pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, nil, m.password)
+            pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{domainCert}, m.password)
 
         }
 

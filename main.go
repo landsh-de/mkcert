@@ -1,4 +1,4 @@
-// Copyright 2018 The mkcert Authors. All rights reserved.
+﻿// Copyright 2018 The mkcert Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -169,7 +169,7 @@ func main() {
 		uninstallFlag = flag.Bool("uninstall", false, "")
 		pkcs12Flag    = flag.Bool("pkcs12", false, "")
 		ecdsaFlag     = flag.Bool("ecdsa", false, "")
-        	ed25519Flag   = flag.Bool("ed25519", false, "")
+        ed25519Flag   = flag.Bool("ed25519", false, "")
 		clientFlag    = flag.Bool("client", false, "")
 		helpFlag      = flag.Bool("help", false, "")
 		carootFlag    = flag.Bool("CAROOT", false, "")
@@ -183,10 +183,10 @@ func main() {
 		countryFlag   = flag.String("country", "DE", "")
 		cnFlag        = flag.String("cn", "MKCERT SELFCERT", "")
 		passwordFlag  = flag.String("password", "", "")
-        	nocaFlag      = flag.Bool("NOCA", false, "")
+        nocaFlag      = flag.Bool("NOCA", false, "")
 	)
 
-    	flag.Usage = func() {
+    flag.Usage = func() {
 		fmt.Fprint(flag.CommandLine.Output(), shortUsage)
 		fmt.Fprintln(flag.CommandLine.Output(), `For more options, run "mkcert -help".`)
 	}
@@ -218,11 +218,11 @@ func main() {
 	if *installFlag && *uninstallFlag {
 		log.Fatalln("ERROR: you can't set -install and -uninstall at the same time")
 	}
-    	// Prevent using "pkcs12" WITH "EDDSA", because "pkcs12"  doesn't support Curve25519
+    // Prevent using "pkcs12" WITH "EDDSA", because "pkcs12"  doesn't support Curve25519
 	if *pkcs12Flag && *ed25519Flag {
 		log.Fatalln("ERROR: pkcs12-container does not support curve25519")
 	}
-    	// Prevent using "ECDSA" AND "EDDSA" at the same time
+    // Prevent using "ECDSA" AND "EDDSA" at the same time
 	if *ecdsaFlag && *ed25519Flag {
 		log.Fatalln("ERROR: you can't set -ecdsa and -ed25519 at the same time")
 	}
@@ -255,7 +255,7 @@ func main() {
 	(&mkcert{
 		installMode: *installFlag, uninstallMode: *uninstallFlag, csrPath: *csrFlag,
 		noca: *nocaFlag, pkcs12: *pkcs12Flag, ecdsa: *ecdsaFlag, ed25519: *ed25519Flag,
-        	client: *clientFlag, certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
+        client: *clientFlag, certFile: *certFileFlag, keyFile: *keyFileFlag, p12File: *p12FileFlag,
 		Organization: *oFlag, OrganizationUnit: *ouFlag, Country: *countryFlag, CommonName: *cnFlag,
 		password: *passwordFlag,
 	}).Run(flag.Args())
@@ -267,7 +267,7 @@ const rootKeyName = "MKCERT_CA-key.pem"
 type mkcert struct {
 	installMode, uninstallMode      bool
 	pkcs12, ecdsa, ed25519, client  bool
-    	noca                            bool
+    noca                            bool
 	keyFile, certFile, p12File      string
 	csrPath                         string
 
@@ -369,7 +369,7 @@ func (m *mkcert) Run(args []string) {
 
 func getCAROOT() string {
 	if env := os.Getenv("CAROOT"); env != "" {
-	return env
+		return env
 	}
 
 	var dir string
@@ -384,7 +384,7 @@ func getCAROOT() string {
 			return ""
 		}
 		dir = filepath.Join(dir, "Library", "Application Support")
-		default: // Unix
+	default: // Unix
 		dir = os.Getenv("HOME")
 		if dir == "" {
 			return ""
