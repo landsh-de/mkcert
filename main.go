@@ -90,7 +90,7 @@ const advancedUsage = `Advanced options:
 		The password used to encrypt the private key-file. By
 		default the password is empty and therefore the private
 		key is not encrypted. Java keystores typically expect
-        the password 'changeit' by default.
+		the password 'ChangeIt' by default.
 
 	-CAROOT
 		Print the CA certificate and key storage location.
@@ -111,23 +111,23 @@ const advancedUsage = `Advanced options:
 	Examples:
 	RSA 4096 SHA512 WITHOUT CA ...........:
 	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname.@my_ou.my_org.de" \
-	-NOCA "vname.nname.@my_ou.my_org.de"
+	-country "de" -cn "vname.nname@my_ou.my_org.de" \
+	-NOCA "vname.nname@my_ou.my_org.de"
 
 	RSA 4096 SHA512 WITH CA ..............:
 	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname.@my_ou.my_org.de" \
-	"vname.nname.@my_ou.my_org.de"
+	-country "de" -cn "vname.nname@my_ou.my_org.de" \
+	"vname.nname@my_ou.my_org.de"
 
 	ECDSA (ECDH_P256) SHA256 WITHOUT CA...:
 	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname.@my_ou.my_org.de" -NOCA \
-	"vname.nname.@my_ou.my_org.de"
+	-country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA \
+	"vname.nname@my_ou.my_org.de"
 
 	ECDSA (ECDH_P256) SHA256 WITH CA......:
 	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname.@my_ou.my_org.de" \
-	"vname.nname.@my_ou.my_org.de"
+	-country "de" -cn "vname.nname@my_ou.my_org.de" \
+	"vname.nname@my_ou.my_org.de"
 `
 
 // Version can be set at link time to override debug.BuildInfo.Main.Version,
@@ -182,7 +182,7 @@ func main() {
 		ouFlag        = flag.String("ou", "MKCERT SELFCERT", "")
 		countryFlag   = flag.String("country", "DE", "")
 		cnFlag        = flag.String("cn", "MKCERT SELFCERT", "")
-		passwordFlag  = flag.String("password", "", "")
+		passwordFlag  = flag.String("password", "ChangeIt", "")
 		nocaFlag      = flag.Bool("NOCA", false, "")
 	)
 
@@ -285,32 +285,32 @@ var rootNameDer = "MKCERT_CA.crt"
 var rootKeyName = "MKCERT_CA-key.pem"
 
 type mkcert struct {
-	installMode, uninstallMode				bool
-	pkcs12, ecdsa, ed25519, client			bool
-	noca									bool
-	keyFile, certFile, p12File, derFile		string
-	csrPath									string
+	installMode, uninstallMode           bool
+	pkcs12, ecdsa, ed25519, client       bool
+	noca                                 bool
+	keyFile, certFile, p12File, derFile  string
+	csrPath                              string
 
-	CAROOT				string
-	caCert				*x509.Certificate
-	caKey				crypto.PrivateKey
+	CAROOT string
+	caCert *x509.Certificate
+	caKey  crypto.PrivateKey
 
-	Organization		string
-	OrganizationUnit	string
-	Country				string
-	CommonName			string
+	Organization     string
+	OrganizationUnit string
+	Country          string
+	CommonName       string
 
-	password			string
+	password         string
 
 	// unique cert- / key-file, when current user is readable
-	rootName			string
-	rootNameDer			string
-	rootKeyName			string
+	rootName         string
+	rootNameDer      string
+	rootKeyName      string
 
 	// The system cert pool is only loaded once. After installing the root, checks
 	// will keep failing until the next execution. TODO: maybe execve?
 	// https://github.com/golang/go/issues/24540 (thanks, myself)
-	ignoreCheckFailure	bool
+	ignoreCheckFailure bool
 }
 
 func (m *mkcert) Run(args []string) {

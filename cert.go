@@ -152,8 +152,8 @@ func (m *mkcert) makeCert(hosts []string) {
 	fatalIfErr(err, "failed to encode public key")
 
 	var spki struct {
-		Algorithm			pkix.AlgorithmIdentifier
-		SubjectPublicKey	asn1.BitString
+		Algorithm        pkix.AlgorithmIdentifier
+		SubjectPublicKey asn1.BitString
 	}
 	_, err = asn1.Unmarshal(spkiASN1, &spki)
 	fatalIfErr(err, "failed to decode public key")
@@ -169,17 +169,17 @@ func (m *mkcert) makeCert(hosts []string) {
 		SerialNumber: randomSerialNumber(),
 		SignatureAlgorithm: m.GetSignatureAlgorithm(),
 		Subject: pkix.Name{
-			Organization:			[]string{m.Organization},
-		//  OrganizationalUnit:		[]string{userAndHostname},
-			OrganizationalUnit:		[]string{m.OrganizationUnit},
-			Country:				[]string{m.Country},
-		//  CommonName:				m.CommonName + " certificate",
-			CommonName:				m.CommonName,
+			Organization:       []string{m.Organization},
+		// OrganizationalUnit:  []string{userAndHostname},
+			OrganizationalUnit: []string{m.OrganizationUnit},
+			Country:            []string{m.Country},
+		// CommonName:          m.CommonName + " certificate",
+			CommonName:         m.CommonName,
 		},
-		SubjectKeyId:		skid[:],
-		AuthorityKeyId:		skid[:],
-		NotBefore:			time.Now(), NotAfter: expiration,
-		KeyUsage:			x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		SubjectKeyId:           skid[:],
+		AuthorityKeyId:         skid[:],
+		NotBefore:              time.Now(), NotAfter: expiration,
+		KeyUsage:               x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 	}
 
 	for _, h := range hosts {
@@ -243,23 +243,23 @@ func (m *mkcert) makeCert(hosts []string) {
 		if m.password == "" {
 			privPEMBlock = &pem.Block{Type: "PRIVATE KEY", Bytes: privDER}
 		} else {
-			// TODO:	check which cipher is most used/compatible.
-			//			Now chosen very conservative choice of 3DES.
-			// TODO:	can we fix the deprecation warning:
-			//			documentation does not specify an alternative.
+			// TODO: check which cipher is most used/compatible.
+			//       Now chosen very conservative choice of 3DES.
+			// TODO: can we fix the deprecation warning:
+			//       documentation does not specify an alternative.
 			// AS OF 20211006: CHANGED 3DES to AES256 by vitus ... but ...
 			// PEMBlock encryption is deprecated:
-			// ################################################################################	!!
-			// !! https://github.com/golang/go/commit/57af9745bfad2c20ed6842878e373d6c5b79285a	!!
-			// !! still using old aes-cbc block-mode in rfc of pkcs12							!!
-			// !! See: https://www.rfc-editor.org/rfc/rfc7292.html#appendix-C					!!
-			// By https://github.com/SSLMate/go-pkcs12/blob/master/safebags.go#L66, we got an	!!
-			//		encoded "oidPBEWithSHAAnd3KeyTripleDESCBC" and ...							!!
-			// by https://github.com/SSLMate/go-pkcs12/blob/master/pkcs12.go#L690, we got an	!!
-			//		encoded "oidPBEWithSHAAnd40BitRC2CBC"										!!
-			// you may analyze this stuff with dumpasn1 (gcc -o dumpasn1.exe dumpasn1.c):		!!
-			// https://www.cs.auckland.ac.nz/~pgut001/dumpasn1.c								!!
-			// https://www.cs.auckland.ac.nz/~pgut001/dumpasn1.cfg								!!
+			// ################################################################################ !!
+			// !! https://github.com/golang/go/commit/57af9745bfad2c20ed6842878e373d6c5b79285a  !!
+			// !! still using old aes-cbc block-mode in rfc of pkcs12                           !!
+			// !! See: https://www.rfc-editor.org/rfc/rfc7292.html#appendix-C                   !!
+			// By https://github.com/SSLMate/go-pkcs12/blob/master/safebags.go#L66, we got an   !!
+			//      encoded "oidPBEWithSHAAnd3KeyTripleDESCBC" and ...                          !!
+			// by https://github.com/SSLMate/go-pkcs12/blob/master/pkcs12.go#L690, we got an    !!
+			//      encoded "oidPBEWithSHAAnd40BitRC2CBC"                                       !!
+			// you may analyze this stuff with dumpasn1 (gcc -o dumpasn1.exe dumpasn1.c):       !!
+			// https://www.cs.auckland.ac.nz/~pgut001/dumpasn1.c                                !!
+			// https://www.cs.auckland.ac.nz/~pgut001/dumpasn1.cfg                              !!
 			// ################################################################################	!!
 			privPEMBlock, err = x509.EncryptPEMBlock(rand.Reader, "PRIVATE KEY", privDER,
 				[]byte(m.password), x509.PEMCipherAES256)
@@ -312,7 +312,7 @@ func (m *mkcert) makeCert(hosts []string) {
 		}
 	} else {
 		log.Printf("\nThe PKCS#12 bundle is at \"%s\"\n", p12File)
-		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"changeit\"\n")
+		log.Printf("\nThe legacy PKCS#12 encryption password is the often hardcoded default \"ChangeIt\"\n")
 	}
 
 	log.Printf("It will expire on %s\n", expiration.Format("2 January 2006"))
@@ -544,8 +544,8 @@ func (m *mkcert) newCA() {
 	fatalIfErr(err, "failed to encode public key")
 
 	var spki struct {
-		Algorithm			pkix.AlgorithmIdentifier
-		SubjectPublicKey	asn1.BitString
+		Algorithm        pkix.AlgorithmIdentifier
+		SubjectPublicKey asn1.BitString
 	}
 	_, err = asn1.Unmarshal(spkiASN1, &spki)
 	fatalIfErr(err, "failed to decode public key")
