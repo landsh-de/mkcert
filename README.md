@@ -1,19 +1,22 @@
 # mkcert
 
-This is a reloaded version of mkcert :-)
-I needed some hardenings in cert parameters for other projects, so i changed some implementations here. I also added "ed25519" but i'm not sure if this works correcty in a smime-certificate under Windows.
+This is a reloaded version of mkcert :-)<br><br>
+This fork of mkcert is part of my preparatory work for the <a href="https://gpg4win.de" rel="nofollow">Gpg4Win / GnuPG VS-Desktop</a> - project in the context of "VS-NfD" (aka "de-vs") conformity and hardenings.
 
-Hmm ... "certmgr" shows only the OID of "ed25519" for a "smime-cert" ... so you're invited to tell me some good hints for a better coding of a "ed25519-smime-certificate" :-)
+In order to comply with the technical requirements of the <a href="https://www.bsi.bund.de/DE/Themen/Oeffentliche-Verwaltung/Zulassung/Liste-zugelassener-Produkte/liste-zugelassener-produkte_node.html" rel="nofollow">BSI (Federal Office for Information Security)</a> for X.509-certificates; i added some hardenings here. I also added "ed25519" for testing.<br>
 
-This stuff is based on mkcert v1.4.3 Copyright 2018 by the mkcert Authors. Original version copyright by Filippo Valsorda, software engineer on the Go security team at Google.
+Be aware, that the generated X.509 certificates (RSA) are not fully conformant to the "de-vs" mode, because of their self-signed status but I think the RSA-4096-SHA512-certs are technical conformant to the requirements ...
+
+This stuff is based on mkcert v1.4.3 Copyright 2018 by the mkcert Authors.<br>Original version copyright by Filippo Valsorda, software engineer on the Go security team at Google.
 
 Changes in this version:
 
 - Larger key-size for RSA (4096 bit)
 - RSA suite with hash SHA-512
-- ECDSA suite with curve P-256 and SHA-256
-  (This implementation uses constant-time algorithms)
-- AES256 as cipher for pkcs12/pfx-store
+- ECDSA suite with curve P-256 and SHA-256<br>
+  <b>(This GO-implementation uses constant-time algorithms !)</b>
+- AES256 as cipher for pkcs12/pfx-store<br>
+  <b>(Due to old weak specs in <a href="https://www.rfc-editor.org/rfc/rfc7292.html#appendix-C" rel="nofollow">rfc7292</a> of "pkcs12",<br>it is recommended to encrypt the pfx-store with an<br> additional hardened encryption scheme here.)</b>
 - Organisation and Common-Name support
 - Custom Organisational-Unit support
 - Custom Country support
