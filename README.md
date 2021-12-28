@@ -7,7 +7,7 @@ In order to comply with the technical requirements of the <a href="https://www.b
 
 ### Some informations to the Brainpool-Curves (designed and authorized by the BSI) and that are still conformant to the VS-NfD (de-vs) Mode.
 
-### I did not implement the creation of Brainpool-Curves in "mkcert", because of important security considerations ...
+### I did not implement the creation of Brainpool-Curves in "mkcert", because of security considerations ...
 
 * The implementation is potentially insecure. See Informations by the <a href="https://bada55.cr.yp.to/brainpool.html" rel="nofollow">BADA55 Research Team</a>.
 * See additional security considerations to the group of Brainpool Curves represented by <a href="http://safecurves.cr.yp.to/rigid.html" rel="nofollow">"brainpoolP256t1"</a> at "SafeCurves Rigidity" by "Daniel J. Bernstein" and "Tanja Lange".
