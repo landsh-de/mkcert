@@ -84,7 +84,7 @@ Install the local CA in the system trust store in combination with the examples 
   The password used to encrypt the private key-file.
   By default the password is empty and therefore the private key
   is not encrypted. Java keystores typically expect the password
-  'changeit' by default.
+  'ChangeIt' by default.
 
  -CAROOT
   Print the CA certificate and key storage location.
