@@ -11,7 +11,8 @@ In order to comply with the technical requirements of the <a href="https://www.b
 
 * The implementation is potentially insecure. See Informations by the <a href="https://bada55.cr.yp.to/brainpool.html" rel="nofollow">BADA55 Research Team</a>.
 * See additional security considerations to the group of Brainpool Curves represented by <a href="http://safecurves.cr.yp.to/rigid.html" rel="nofollow">"brainpoolP256t1"</a> at "SafeCurves Rigidity" by "Daniel J. Bernstein" and "Tanja Lange".
-* Details to parts of DragonBlood Vulnerabilities in WPA3, caused by Bainpool-usage at the <a href="https://www.heise.de/security/meldung/Dragonblood-Neue-Luecken-in-WLAN-Verschluesselung-WPA3-koennten-WPA3-1-noetig-machen-4489397.html#nav_brainpool_kurven__1" rel="nofollow">Heise Security Forum</a>.
+* <a href="https://nvd.nist.gov/vuln/detail/CVE-2019-13377#vulnCurrentDescriptionTitle" rel="nofollow">DragonBlood Vulnerabilities</a> in a context of Brainpool-Curves.
+* <a href="https://wpa3.mathyvanhoef.com" rel="nofollow">Details</a> to parts of DragonBlood Vulnerabilities in WPA3, caused by Bainpool-usage also at the <a href="https://www.heise.de/security/meldung/Dragonblood-Neue-Luecken-in-WLAN-Verschluesselung-WPA3-koennten-WPA3-1-noetig-machen-4489397.html#nav_brainpool_kurven__1" rel="nofollow">Heise Security Forum</a>.
 * In the latest <a href="https://www.wi-fi.org/file/wi-fi-protected-access-security-considerations" rel="nofollow">"Security Considerations"</a> of the Wi-Fi Alliance, you <b>WILL NOT FIND</b> Diffie-Hellman Groups of 27-30 (<b>Brainpool groups</b>).
 
 <br>
