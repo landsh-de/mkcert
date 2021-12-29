@@ -3,7 +3,7 @@
 This is a reloaded version of mkcert :-)<br><br>
 This fork of mkcert is part of my preparatory work for integration of <a href="https://gpg4win.de" rel="nofollow">Gpg4Win / GnuPG VS-Desktop</a> in the context of "VS-NfD" (aka "de-vs") conformity and hardenings.
 
-In order to comply with the technical requirements of the <a href="https://www.bsi.bund.de/DE/Themen/Oeffentliche-Verwaltung/Zulassung/Liste-zugelassener-Produkte/liste-zugelassener-produkte_node.html" rel="nofollow">BSI (Federal Office for Information Security)</a> for X.509-certificates; i added some hardenings here. I also added "ed25519" for testing.<br>
+In order to comply with the technical requirements of the <a href="https://www.bsi.bund.de/DE/Themen/Oeffentliche-Verwaltung/Zulassung/Liste-zugelassener-Produkte/liste-zugelassener-produkte_node.html" rel="nofollow">BSI (Federal Office for Information Security)</a> for X.509-certificates, i added some hardenings here. I also added "ed25519" for testing.<br>
 
 ### Some informations to the Brainpool-Curves (designed and authorized by the BSI) and that are still conformant to the VS-NfD (de-vs) mode.
 
