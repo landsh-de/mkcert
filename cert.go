@@ -24,7 +24,7 @@
 // ##################################################################
 // smimeCapabilities NOT IMPLEMENTED, DUE TO SECURITY CONSIDERATIONS.
 // https://datatracker.ietf.org/doc/html/rfc4262#section-4
-// Also we connot gurantee that the hardened algorithms are used by
+// Also we cannot guarantee that the hardened algorithms are used by
 // the client, because all proposals are a "SHOULD"-implementation.
 // This extension also MUST NOT be marked critical.
 // https://datatracker.ietf.org/doc/html/rfc4262
@@ -139,6 +139,9 @@ func (m *mkcert) makeCert(hosts []string) {
 		}
 	}
 
+	// For ... mypriv.(*rsa.PrivateKey) ... below
+	// var mypriv any
+
 	priv, err := m.generateKey(false)
 	fatalIfErr(err, "failed to generate certificate key")
 
@@ -165,21 +168,39 @@ func (m *mkcert) makeCert(hosts []string) {
 	// including custom roots. See https://support.apple.com/en-us/HT210176.
 	expiration := time.Now().AddDate(2, 3, 0)
 
+	// From:
+	// https://go.googlesource.com/go/+/dev.boringcrypto/src/crypto/tls/generate_cert.go#84
+	//
+	// ECDSA, ED25519 and RSA subject keys should have the DigitalSignature
+	// KeyUsage bits set in the x509.Certificate template.
+	// keyUsage := x509.KeyUsageDigitalSignature
+	// Only RSA subject keys should have the KeyEncipherment KeyUsage bits set.
+	// In this context KeyUsage is particular to RSA key exchange and
+	// authentication.
+	// if _, isRSA := mypriv.(*rsa.PrivateKey); isRSA {
+	// 	keyUsage |= x509.KeyUsageKeyEncipherment
+	// }
+
 	tpl := &x509.Certificate{
-		SerialNumber: randomSerialNumber(),
-		SignatureAlgorithm: m.GetSignatureAlgorithm(),
-		Subject: pkix.Name{
-			Organization:       []string{m.Organization},
-		// OrganizationalUnit:  []string{userAndHostname},
-			OrganizationalUnit: []string{m.OrganizationUnit},
-			Country:            []string{m.Country},
-		// CommonName:          m.CommonName + " certificate",
-			CommonName:         m.CommonName,
+		SerialNumber: 				randomSerialNumber(),
+		SignatureAlgorithm: 		m.GetSignatureAlgorithm(),
+		Subject: 					pkix.Name{
+			Organization:       	[]string{m.Organization},
+			// OrganizationalUnit:	[]string{userAndHostname},
+			OrganizationalUnit: 	[]string{m.OrganizationUnit},
+			Country:            	[]string{m.Country},
+			// CommonName:			m.CommonName + " certificate",
+			CommonName:         	m.CommonName,
 		},
-		SubjectKeyId:           skid[:],
-		AuthorityKeyId:         skid[:],
-		NotBefore:              time.Now(), NotAfter: expiration,
-		KeyUsage:               x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		SubjectKeyId:           	skid[:],
+		AuthorityKeyId:         	skid[:],
+		NotBefore:              	time.Now(), NotAfter: expiration,
+
+		KeyUsage: 					x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		// From:
+		// https://go.googlesource.com/go/+/dev.boringcrypto/src/crypto/tls/generate_cert.go#120
+		//
+		// KeyUsage:				keyUsage,
 	}
 
 	for _, h := range hosts {
@@ -293,7 +314,7 @@ func (m *mkcert) makeCert(hosts []string) {
 			// Use CA-cert for pkcs12 encoding:
 			pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{m.caCert}, m.password)
 		} else {
-			// Use my selfsingned cert for pkcs12 encoding:
+			// Use my selfsigned cert for pkcs12 encoding:
 			// pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, nil, m.password)
 			pfxData, err = pkcs12.Encode(rand.Reader, priv, domainCert, []*x509.Certificate{domainCert}, m.password)
 		}
@@ -435,6 +456,9 @@ func (m *mkcert) makeCertFromCSR() {
 		log.Fatalln("ERROR: can't create new certificates because the CA key (MKCERT_CA-key.pem) is missing")
 	}
 
+	// For ... mypriv.(*rsa.PrivateKey) ... below
+	// var mypriv any
+
 	csrPEMBytes, err := ioutil.ReadFile(m.csrPath)
 	fatalIfErr(err, "failed to read the CSR")
 	csrPEM, _ := pem.Decode(csrPEMBytes)
@@ -449,24 +473,46 @@ func (m *mkcert) makeCertFromCSR() {
 	fatalIfErr(err, "failed to parse the CSR")
 	fatalIfErr(csr.CheckSignature(), "invalid CSR signature")
 
+	// Certificates last for 2 years and 3 months, which is always less than
+	// 825 days, the limit that macOS/iOS apply to all certificates,
+	// including custom roots. See https://support.apple.com/en-us/HT210176.
 	expiration := time.Now().AddDate(2, 3, 0)
-	tpl := &x509.Certificate{
-		SerialNumber: randomSerialNumber(),
-		SignatureAlgorithm: m.GetSignatureAlgorithm(),
-		Subject: csr.Subject,
-		ExtraExtensions: csr.Extensions, // includes requested SANs, KUs and EKUs
 
-		NotBefore: time.Now(), NotAfter: expiration,
+	// From:
+	// https://go.googlesource.com/go/+/dev.boringcrypto/src/crypto/tls/generate_cert.go#84
+	//
+	// ECDSA, ED25519 and RSA subject keys should have the DigitalSignature
+	// KeyUsage bits set in the x509.Certificate template.
+	// keyUsage := x509.KeyUsageDigitalSignature
+	// Only RSA subject keys should have the KeyEncipherment KeyUsage bits set.
+	// In this context KeyUsage is particular to RSA key exchange and
+	// authentication.
+	// if _, isRSA := mypriv.(*rsa.PrivateKey); isRSA {
+	// 	keyUsage |= x509.KeyUsageKeyEncipherment
+	// }
+
+	tpl := &x509.Certificate{
+		SerialNumber: 			randomSerialNumber(),
+		SignatureAlgorithm: 	m.GetSignatureAlgorithm(),
+		Subject: 				csr.Subject,
+		ExtraExtensions: 		csr.Extensions, // includes requested SANs, KUs and EKUs
+
+		NotBefore: 				time.Now(), NotAfter: expiration,
 
 		// If the CSR does not request a SAN extension, fix it up for them as
 		// the Common Name field does not work in modern browsers. Otherwise,
 		// this will get overridden.
-		DNSNames: []string{csr.Subject.CommonName},
+		DNSNames: 				[]string{csr.Subject.CommonName},
+
+		KeyUsage: x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		// From:
+		// https://go.googlesource.com/go/+/dev.boringcrypto/src/crypto/tls/generate_cert.go#120
+		//
+		// KeyUsage:			keyUsage,
 
 		// Likewise, if the CSR does not set KUs and EKUs, fix it up as Apple
 		// platforms require serverAuth for TLS.
-		KeyUsage:    x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		ExtKeyUsage: 			[]x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
 
 	if m.client {
@@ -478,14 +524,16 @@ func (m *mkcert) makeCertFromCSR() {
 
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, m.caCert, csr.PublicKey, m.caKey)
 	fatalIfErr(err, "Failed to generate certificate ...\nThe \"SignatureAlgorithm\" does not match the private key-type of the \"CA\",\nthat was previously generated before this request ... To use the same\nalgorithm, you may change the option from \"-ecdsa\" to leave it blank for\n\"RSA\" or use \"-ecdsa\" to use \"Elliptic-Curve DSA\" ...\nError")
+	c, err := x509.ParseCertificate(cert)
+	fatalIfErr(err, "failed to parse generated certificate")
 
 	var hosts []string
-	hosts = append(hosts, csr.DNSNames...)
-	hosts = append(hosts, csr.EmailAddresses...)
-	for _, ip := range csr.IPAddresses {
-		hosts = append(hosts, ip.String())
+	hosts = append(hosts, c.DNSNames...)
+	hosts = append(hosts, c.EmailAddresses...)
+	for _, ip := range c.IPAddresses {
+	hosts = append(hosts, ip.String())
 	}
-	for _, uri := range csr.URIs {
+	for _, uri := range c.URIs {
 		hosts = append(hosts, uri.String())
 	}
 	certFile, _, _, _ := m.fileNames(hosts)
@@ -553,36 +601,34 @@ func (m *mkcert) newCA() {
 	skid := sha1.Sum(spki.SubjectPublicKey.Bytes)
 
 	tpl := &x509.Certificate{
-		SerialNumber: randomSerialNumber(),
-		SignatureAlgorithm: m.GetSignatureAlgorithm(),
-		Subject: pkix.Name{
-			Organization:       []string{m.Organization},
-			// OrganizationalUnit: []string{userAndHostname},
-			OrganizationalUnit: []string{m.OrganizationUnit},
-			Country:            []string{m.Country},
+		SerialNumber: 				randomSerialNumber(),
+		SignatureAlgorithm: 		m.GetSignatureAlgorithm(),
+		Subject: 					pkix.Name{
+			Organization:       	[]string{m.Organization},
+			// OrganizationalUnit:	[]string{userAndHostname},
+			OrganizationalUnit:		[]string{m.OrganizationUnit},
+			Country:				[]string{m.Country},
 
 			// The CommonName is required by iOS to show the certificate in the
 			// "Certificate Trust Settings" menu.
 			// https://github.com/FiloSottile/mkcert/issues/47
 			// CommonName: m.CommonName,
 			// Reverted back to CA-index in m.CommonName for some PKI-Policies needed.
-			CommonName: m.CommonName + " CA",
-
-
+			CommonName: 			m.CommonName + " CA",
 		},
-		SubjectKeyId:   skid[:],
-		AuthorityKeyId: skid[:],
+		SubjectKeyId:   			skid[:],
+		AuthorityKeyId: 			skid[:],
 
 		// CA lifetime of 10 years seems too long ... reduced to 4 years
 		// NotAfter:  time.Now().AddDate(10, 0, 0),
-		NotAfter:  time.Now().AddDate(4, 0, 0),
-		NotBefore: time.Now(),
+		NotAfter:					time.Now().AddDate(4, 0, 0),
+		NotBefore:					time.Now(),
 
-		KeyUsage: x509.KeyUsageCertSign,
+		KeyUsage:					x509.KeyUsageCertSign,
 
-		BasicConstraintsValid: true,
-		IsCA:                  true,
-		MaxPathLenZero:        true,
+		BasicConstraintsValid:		true,
+		IsCA:						true,
+		MaxPathLenZero:				true,
 	}
 
 	cert, err := x509.CreateCertificate(rand.Reader, tpl, tpl, pub, priv)

@@ -49,26 +49,30 @@ const shortUsage = `Usage of mkcert:
 
 `
 
-const advancedUsage = `Advanced options:
+const advancedUsage = `
+	Advanced options:
+
+	default / no "-ecdsa" or "-ed25519" option provided:
+		Create a certificate with a RSA key.
 
 	-cert-file FILE, -key-file FILE, -p12-file FILE
 		Customize the output paths.
 
 	-client
-		Generate a certificate for client authentication.
+		Create a certificate for client authentication.
 
 	-ecdsa
-		Generate a certificate with an ECDSA key.
+		Create a certificate with an ECDSA key.
 
 	-ed25519
-		Generate a certificate with an Ed25519 key.
+		Create a certificate with an Ed25519 key (experimental).
 
 	-pkcs12
-		Generate a ".p12" PKCS #12 file, also know as a ".pfx" file,
+		Create a ".p12" PKCS #12 file, also know as a ".pfx" file,
 		containing certificate and key for legacy applications.
 
 	-csr CSR
-		Generate a certificate based on the supplied CSR. Conflicts with
+		Create a certificate based on the supplied CSR. Conflicts with
 		all other flags and arguments except -install and -cert-file.
 
 	-o ORGANIZATION
@@ -110,37 +114,26 @@ const advancedUsage = `Advanced options:
 
 	Examples:
 	RSA 4096 SHA512 WITHOUT CA ...........:
-	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname@my_ou.my_org.de" \
-	-NOCA "vname.nname@my_ou.my_org.de"
+	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA "vname.nname@my_ou.my_org.de"
 
 	RSA 4096 SHA512 WITH CA ..............:
-	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname@my_ou.my_org.de" \
-	"vname.nname@my_ou.my_org.de"
+	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" "vname.nname@my_ou.my_org.de"
 
 	ECDSA (ECDH_P256) SHA256 WITHOUT CA...:
-	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA \
-	"vname.nname@my_ou.my_org.de"
+	mkcert -ecdsa -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA "vname.nname@my_ou.my_org.de"
 
 	ECDSA (ECDH_P256) SHA256 WITH CA......:
-	mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" \
-	-country "de" -cn "vname.nname@my_ou.my_org.de" \
-	"vname.nname@my_ou.my_org.de"
+	mkcert -ecdsa -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" "vname.nname@my_ou.my_org.de"
 `
 
 // Version can be set at link time to override debug.BuildInfo.Main.Version,
 // which is "(devel)" when building from within the module. See
 // golang.org/issue/29814 and golang.org/issue/29228.
 var Version string = `
-mkcert V1.4.7.0 (Reloaded Version by Veit Berwig).
+mkcert V1.4.7.1 (Reloaded Version by Veit Berwig).
+Based on "mkcert" by "Filippo Valsorda" (Google)
 
-Based on mkcert v1.4.3 Copyright 2018 by ...
-The mkcert Authors. Original version copyright by
-Filippo Valsorda, software engineer on the Go
-security team at Google. Changes in this version:
-
+Changes in this version:
 - Larger key-size for RSA (4096 bit)
 - Cert generation without CA-certificate (single self-signed)
 - RSA suite with hash SHA-512
@@ -148,7 +141,7 @@ security team at Google. Changes in this version:
   (This implementation uses constant-time algorithms)
 - AES256 as cipher for pkcs12/pfx-store
 - Organisation and Common-Name support
-- Custom Organisational-Unit support
+- Custom OU support
 - Custom Country support
 - SubjectKeyId in both certs added
 - AuthorityKeyId in both certs added
@@ -160,9 +153,13 @@ security team at Google. Changes in this version:
 
 RSA keys will use....: RSA 4096 bit with SHA512
 ECDSA keys will use..: NIST-P256 (named) with SHA256
-Ed25519 keys will use: PureEd25519 with SHA512`
+Ed25519 keys will use: PureEd25519 with SHA512 (experimental)`
 
 func main() {
+	if len(os.Args) == 1 {
+		fmt.Print(shortUsage)
+		return
+	}
 	log.SetFlags(0)
 	var (
 		installFlag   = flag.Bool("install", false, "")
@@ -518,7 +515,7 @@ func fatalIfErr(err error, msg string) {
 
 func fatalIfCmdErr(err error, cmd string, out []byte) {
 	if err != nil {
-		log.Fatalf("ERROR: failed to execute \"%s\": %s\n%s\n", cmd, err, out)
+		log.Fatalf("ERROR: failed to execute \"%s\": %s\n\n%s\n", cmd, err, out)
 	}
 }
 
