@@ -121,26 +121,20 @@ Install the local CA in the system trust store in combination with the examples 
  ### Examples:
  
   RSA 4096 SHA512 WITHOUT CA:
-  ===========================
   mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA "vname.nname@my_ou.my_org.de"
 
   RSA 4096 SHA512 WITH CA:
-  ========================
   mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" "vname.nname@my_ou.my_org.de"
 
   ECDSA (ECDH_P256) SHA256 WITHOUT CA:
-  ====================================
   mkcert -ecdsa -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA "vname.nname@my_ou.my_org.de"
 
   ECDSA (ECDH_P256) SHA256 WITH CA:
-  =================================
   mkcert -ecdsa -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" "vname.nname@my_ou.my_org.de"
 
 
 ## Original Readme 
 ### (be aware, that i've changed some functionalities like i've described above) ...
-
-<br><br><br><br>
 
 mkcert is a simple tool for making locally-trusted development certificates. It requires no configuration.
 
