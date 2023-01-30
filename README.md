@@ -34,7 +34,7 @@ Changes in this version:
 - Custom Country support
 - SubjectKeyId in both certs added
 - AuthorityKeyId in both certs added
-- Support for Bernstein Curve25519 in cert
+- Support for Curve25519 in cert (experimental)
 - Secure operation, when provided without args (no action)
 - Removed extra special characters in commandline ...
 - Cert generation without CA-certificate with option "-NOCA" possible (single self-signed)
@@ -45,7 +45,7 @@ Changes in this version:
 ```
 RSA keys will use.......: RSA 4096 bit with SHA512
 ECDSA keys will use.....: NIST-P256 (named) with SHA256
-Ed25519 keys will use...: PureEd25519 with SHA512
+Ed25519 keys will use...: PureEd25519 with SHA512 (experimental)
 ```
 ```
 $ mkcert -help
@@ -130,11 +130,11 @@ Install the local CA in the system trust store in combination with the examples 
 
   ECDSA (ECDH_P256) SHA256 WITHOUT CA:
   ====================================
-  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA "vname.nname@my_ou.my_org.de"
+  mkcert -ecdsa -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" -NOCA "vname.nname@my_ou.my_org.de"
 
   ECDSA (ECDH_P256) SHA256 WITH CA:
   =================================
-  mkcert -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" "vname.nname@my_ou.my_org.de"
+  mkcert -ecdsa -pkcs12 -password "password" -o "my_org" -ou "my_ou" -country "de" -cn "vname.nname@my_ou.my_org.de" "vname.nname@my_ou.my_org.de"
 
 
 ## Original Readme 
